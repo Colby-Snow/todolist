@@ -1,0 +1,7 @@
+[
+    {"title": "Eat Breakfast", "completed": false, "id": 1},
+    {"title": "Commute", "completed": false, "id": 2},
+    {"title": "Create Awesome React App", "completed": false, "id": 3},
+    {"title": "Obey New Machine Overlords", "completed": false, "id": 4},
+    {"title": "Buy Steamdeck", "completed": false, "id": 5}
+]
