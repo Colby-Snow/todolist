@@ -3,14 +3,14 @@ import TodoElement from "./TodoElement";
 import {FormControl, FormLabel} from "@material-ui/core";
 import CreateTask from "./CreateTask";
 import ClearTasks from "./ClearTasks";
+import axios from "axios"
 
 const TodoList = () => {
 
     const initialElements = [{
                     desc: "Loading...",
                     status: false,
-                    key: 1,
-                    userId: 1
+                    key: 1
                 }];
 
     //Creates a state for our array of elements that will be displayed
@@ -18,19 +18,18 @@ const TodoList = () => {
 
     useEffect(() => {
         const axios = require('axios');
-        axios.get('http://127.0.0.1:5000/')
+        axios.get('http://127.0.0.1:5000/api/items')
         .then(function (response){
-            console.log(response)
             const newArray = response.data.map(task => {
                 const newTask = {
                     desc: task.title,
                     status: task.completed,
                     key: task.id,
-                    userId: task.userId
                 }
                 //newArray.push(newTask);
                 return newTask;
             })
+            console.log(newArray)
             setTask(newArray)
         })
         .catch(function (error){
@@ -50,16 +49,40 @@ const TodoList = () => {
     //desc: the description of our todolist item
     //status: whether or not our element has been checked off
     function addTask(todoItem){
-        const newTasks = [...tasks];
-        newTasks.push(todoItem);
-        setTask(newTasks);
+        axios.post("http://localhost:5000/api/items", todoItem)
+            .then((result) => {
+                const newArray = result.data.map(task => {
+                    const newTask = {
+                        desc: task.title,
+                        status: task.completed,
+                        key: task.id,
+                    }
+                    return newTask
+                });
+                setTask(newArray);
+            })
+
     }
 
     //Receives an element's index and searches the array for that element then, removes the element from the array.
     function removeTask(todoItemIndex){
-        const newTasks = [...tasks];
-        newTasks.splice(todoItemIndex, 1);
-        setTask(newTasks);
+         const newTasks = [...tasks];
+        // newTasks.splice(todoItemIndex, 1);
+        // setTask(newTasks);
+        const itemId = newTasks[todoItemIndex].key
+        axios.delete("http://localhost:5000/api/items/" + itemId)
+            .then((result) => {
+                const newArray = result.data.map(task => {
+                    const newTask = {
+                        desc: task.title,
+                        status: task.completed,
+                        key: task.id,
+                    }
+                    return newTask
+                });
+                setTask(newArray);
+            })
+
     }
 
     //Receives an element's index and reverses that element's status

@@ -1,7 +1,68 @@
 [
-    {"title": "Eat Breakfast", "completed": false, "id": 1},
-    {"title": "Commute", "completed": false, "id": 2},
-    {"title": "Create Awesome React App", "completed": false, "id": 3},
-    {"title": "Obey New Machine Overlords", "completed": false, "id": 4},
-    {"title": "Buy Steamdeck", "completed": false, "id": 5}
+  {
+    "title": "Eat Breakfast",
+    "completed": false,
+    "id": 1,
+    "deleted": false
+  },
+  {
+    "title": "Commute",
+    "completed": false,
+    "id": 2,
+    "deleted": false
+  },
+  {
+    "title": "Create Awesome React App",
+    "completed": false,
+    "id": 3,
+    "deleted": false
+  },
+  {
+    "title": "Obey New Machine Overlords",
+    "completed": false,
+    "id": 4,
+    "deleted": false
+  },
+  {
+    "title": "Buy Steamdeck",
+    "completed": false,
+    "id": 5,
+    "deleted": false
+  },
+  {
+    "completed": false,
+    "id": 6,
+    "title": "Learn Flask",
+    "deleted": true
+  },
+  {
+    "title": "Create Flask Api",
+    "completed": false,
+    "id": 7,
+    "deleted": false
+  },
+  {
+    "title": "Fix Flask Api",
+    "completed": false,
+    "id": 8,
+    "deleted": false
+  },
+  {
+    "title": "",
+    "completed": false,
+    "id": 9,
+    "deleted": true
+  },
+  {
+    "title": "",
+    "completed": false,
+    "id": 10,
+    "deleted": true
+  },
+  {
+    "title": "",
+    "completed": false,
+    "id": 11,
+    "deleted": true
+  }
 ]

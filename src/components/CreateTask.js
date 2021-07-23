@@ -10,8 +10,8 @@ const CreateTask = (props) => {
 
     function addHandler(e) {
         props.addTask({
-            desc: desc,
-            status: false,
+            title: desc,
+            completed: false,
             key: props.arrLength + 1
         })
         setDesc('')
