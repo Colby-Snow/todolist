@@ -88,13 +88,19 @@ const TodoList = () => {
     //Receives an element's index and reverses that element's status
     function reverseStatus(todoItemIndex){
         const newTasks = [...tasks];
-        if (newTasks[todoItemIndex].status){
-            newTasks[todoItemIndex].status = false;
-        }
-        else{
-            newTasks[todoItemIndex].status = true;
-        }
-        setTask(newTasks)
+        const itemId = newTasks[todoItemIndex].key
+        axios.put("http://localhost:5000/api/items/" + itemId)
+            .then((result) => {
+                const newArray = result.data.map(task => {
+                    const newTask = {
+                        desc: task.title,
+                        status: task.completed,
+                        key: task.id,
+                    }
+                    return newTask
+                });
+                setTask(newArray)
+            })
     }
 
     //Removes all items from the checkbox array

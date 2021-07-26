@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
 
+from backend.todo_database import TodoDatabase
+
 app = Flask(__name__)
 CORS(app)
 
@@ -26,9 +28,9 @@ def write_items(all_items):
 
 
 def load_all_items():
-    with open('backend/data.json', 'r') as file:
-        items = json.loads(file.read())
-        return items
+    raw_data = TodoDatabase().load()
+    all_items = [entry for entry in raw_data if entry['deleted'] == False]
+    return all_items
 
 
 @app.route('/api/items', methods=['GET'])
@@ -39,8 +41,8 @@ def get_items():
 
 @app.route("/api/items/<int:item_id>", methods=['GET'])
 def one_item(item_id):
-    raw_data = load_all_items()
-    requested_item = next((item for item in raw_data if item['id'] == item_id), None)
+    tododb = TodoDatabase()
+    requested_item = tododb.load_on_id(item_id)[0]
     if requested_item["deleted"]:
         # Put an item was deleted message or something similar
         return jsonify(requested_item)
@@ -50,32 +52,40 @@ def one_item(item_id):
 
 @app.route("/api/items/<int:item_id>", methods=['DELETE'])
 def delete_item(item_id):
-    all_items = load_all_items()
-    for item in all_items:
-        if item['id'] == item_id:
-            item['deleted'] = True
-
-    write_items(all_items)
-    display_items = load_display_items(all_items)
+    # all_items = load_all_items()
+    # for item in all_items:
+    #     if item['id'] == item_id:
+    #         item['deleted'] = True
+    todoDB = TodoDatabase()
+    todoDB.delete(item_id)
+    display_items = load_display_items(load_all_items())
     return jsonify(display_items)
 
 
 @app.route("/api/items/<int:item_id>", methods=['PUT'])
-def undelete_item(item_id):
-    all_items = load_all_items()
-    for item in all_items:
-        if item['id'] == item_id:
-            item['deleted'] = False
-    pass
+def completed_item(item_id):
+    tododb = TodoDatabase()
+    target_item = tododb.load_on_id(item_id)[0]
+    target_item["completed"] = not target_item["completed"]
+    tododb.complete(target_item)
+    display_items = load_display_items(load_all_items())
+    return jsonify(display_items)
+
+
+# @app.route("/api/items/<int:item_id>", methods=['PUT'])
+# def undelete_item(item_id):
+#     all_items = load_all_items()
+#     for item in all_items:
+#         if item['id'] == item_id:
+#             item['deleted'] = False
+#     pass
 
 
 @app.route("/api/items", methods=['POST'])
 def create_item():
     new_item = json.loads(request.data)
-    all_items = load_all_items()
-    new_item["id"] = generate_id(all_items)
     new_item["deleted"] = False
-    all_items.append(new_item)
-    write_items(all_items)
-    display_items = load_display_items(all_items)
+    _toDoDatabase = TodoDatabase()
+    _toDoDatabase.save(new_item)
+    display_items = load_display_items(load_all_items())
     return jsonify(display_items)
