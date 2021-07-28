@@ -1,9 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import TodoElement from "./TodoElement";
 import {FormControl, FormLabel} from "@material-ui/core";
 import CreateTask from "./CreateTask";
 import ClearTasks from "./ClearTasks";
 import axios from "axios"
+import UserContext from "./UserContext";
+import {useParams} from "react-router";
 
 const TodoList = () => {
 
@@ -15,6 +17,15 @@ const TodoList = () => {
 
     //Creates a state for our array of elements that will be displayed
     const [tasks, setTask] = useState(initialElements);
+    const context = useContext(UserContext);
+    const {user_id} = useParams();
+
+  useEffect(() => {
+    if(!context.user || context.user.id !== parseInt(user_id, 10)) {
+      context.actions.logout()
+    }
+  }, [context.user])
+
 
     useEffect(() => {
         const axios = require('axios');
@@ -26,7 +37,6 @@ const TodoList = () => {
                     status: task.completed,
                     key: task.id,
                 }
-                //newArray.push(newTask);
                 return newTask;
             })
             console.log(newArray)
@@ -67,8 +77,6 @@ const TodoList = () => {
     //Receives an element's index and searches the array for that element then, removes the element from the array.
     function removeTask(todoItemIndex){
          const newTasks = [...tasks];
-        // newTasks.splice(todoItemIndex, 1);
-        // setTask(newTasks);
         const itemId = newTasks[todoItemIndex].key
         axios.delete("http://localhost:5000/api/items/" + itemId)
             .then((result) => {
