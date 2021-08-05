@@ -1,91 +1,45 @@
-from flask import Flask, jsonify, request
+from flask import Flask
 from flask_cors import CORS
-import json
 
-from backend.todo_database import TodoDatabase
+import bcrypt
+from backend.models.users import Users
+from backend.views.users_view import UserView
+from backend.views.items_view import ItemView
+from sqlalchemy.engine import URL
+from backend.db import db
+import os
+from flask_jwt import JWT
 
 app = Flask(__name__)
 CORS(app)
+config_file_name = os.environ['CONFIG']
+app.config.from_json(config_file_name)
+
+db.init_app(app)
 
 
-def load_display_items(all_items):
-    not_deleted_items = []
-    for item in all_items:
-        if not item["deleted"]:
-            not_deleted_items.append(item)
-    return not_deleted_items
+def authentication(username, password):
+    user = db.session.query(Users).filter(Users.username == username).one()
+    if bcrypt.checkpw(password.encode(), user.password.encode()):
+        return user
 
 
-def generate_id(all_items):
-    new_id = max(item["id"] for item in all_items) + 1
-    return new_id
+def identity(identity):
+    user = db.session.query(Users).filter(Users.id == identity['identity']).one()
+    return user
 
 
-def write_items(all_items):
-    with open('backend/data.json', 'w') as file:
-        file.write(json.dumps(all_items))
-        return all_items
+JWT(app, authentication, identity)
 
 
-def load_all_items():
-    raw_data = TodoDatabase().load()
-    all_items = [entry for entry in raw_data if entry['deleted'] == False]
-    return all_items
+def register_api(view, endpoint, url, pk='id', pk_type='int'):
+    view_func = view.as_view(endpoint)
+    app.add_url_rule(url, defaults={pk: None},
+                     view_func=view_func, methods=['GET',])
+    app.add_url_rule(url, view_func=view_func, methods=['POST',])
+    app.add_url_rule(f'{url}/<{pk_type}:{pk}>', view_func=view_func,
+                     methods=['GET', 'PUT', 'DELETE'])
 
 
-@app.route('/api/items', methods=['GET'])
-def get_items():
-    display_items = load_display_items(load_all_items())
-    return jsonify(display_items)
-
-
-@app.route("/api/items/<int:item_id>", methods=['GET'])
-def one_item(item_id):
-    tododb = TodoDatabase()
-    requested_item = tododb.load_on_id(item_id)[0]
-    if requested_item["deleted"]:
-        # Put an item was deleted message or something similar
-        return jsonify(requested_item)
-    else:
-        return jsonify(requested_item)
-
-
-@app.route("/api/items/<int:item_id>", methods=['DELETE'])
-def delete_item(item_id):
-    # all_items = load_all_items()
-    # for item in all_items:
-    #     if item['id'] == item_id:
-    #         item['deleted'] = True
-    todoDB = TodoDatabase()
-    todoDB.delete(item_id)
-    display_items = load_display_items(load_all_items())
-    return jsonify(display_items)
-
-
-@app.route("/api/items/<int:item_id>", methods=['PUT'])
-def completed_item(item_id):
-    tododb = TodoDatabase()
-    target_item = tododb.load_on_id(item_id)[0]
-    target_item["completed"] = not target_item["completed"]
-    tododb.complete(target_item)
-    display_items = load_display_items(load_all_items())
-    return jsonify(display_items)
-
-
-# @app.route("/api/items/<int:item_id>", methods=['PUT'])
-# def undelete_item(item_id):
-#     all_items = load_all_items()
-#     for item in all_items:
-#         if item['id'] == item_id:
-#             item['deleted'] = False
-#     pass
-
-
-@app.route("/api/items", methods=['POST'])
-def create_item():
-    new_item = json.loads(request.data)
-    new_item["deleted"] = False
-    _toDoDatabase = TodoDatabase()
-    _toDoDatabase.save(new_item)
-    display_items = load_display_items(load_all_items())
-    return jsonify(display_items)
+register_api(ItemView, 'items', '/api/items', 'item_id')
+register_api(UserView, 'users', '/api/users', 'user_id')

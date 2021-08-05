@@ -1,25 +1,56 @@
 import React, {useState} from 'react';
 import {Button, TextField} from "@material-ui/core";
-import {Link} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
+import axios from "axios";
 
 function CreateAccount(props) {
 
+        const [formState, setFormState] = useState({
+      username: '',
+      password: '',
+      password2: ''
+    })
 
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState({})
 
-    function handleCreate(e){
+    const history = useHistory()
 
+    const extractError = key => {
+      if (errors[key]) {
+        return errors[key].join(' ')
+      }
+      return ''
     }
+
+    const handleCreate = () => {
+      axios.post('http://localhost:5000/api/users/', formState)
+        .then(() => {
+          history.push('/')
+        }).catch((e) => {
+            console.log(e)
+          setErrors(e.response.data)
+      })
+    }
+
+    const setFormField = field => e => {
+      setFormState({...formState, [field]: e.target.value})
+    }
+
 
     return (
         <div>
             <h1>Welcome to Todo App</h1>
             <div>
-                <TextField label="Username" value={username} onChange={e => setUsername(e.target.value)}></TextField>
+                <TextField label="Username" value={formState.username} onChange={setFormField('username')}></TextField>
+                <span style={{color: 'red'}}>{extractError('username')}</span>
             </div>
             <div>
-                <TextField label="Password" value={password} onChange={e => setPassword(e.target.value)}></TextField>
+                <TextField label="Password" type="password" value={formState.password} onChange={setFormField('password')}></TextField>
+                <span style={{color: 'red'}}>{extractError('password')}</span>
+            </div>
+            <div>
+                <TextField label="Re-Enter Password" type="password" value={formState.password2} onChange={setFormField('password2')}></TextField>
+                <span style={{color: 'red'}}>{extractError('password2')}</span>
             </div>
             <div>
                 <Button color="primary" variant="contained" onClick={handleCreate}>Submit</Button>

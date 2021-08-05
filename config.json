@@ -1,0 +1,6 @@
+{
+  "SQLALCHEMY_TRACK_MODIFICATIONS": false,
+  "SQLALCHEMY_DATABASE_URI": "postgresql://colby-snow:admin@localhost:5432/directory",
+  "SQLALCHEMY_ECHO": true,
+  "JWT_SECRET_KEY": "7Peaw3SGtZxaYGYC7p7MNSdrp96zAdK+XE3zwzqwrpz3g01qGZrS1UV1naa6Q3P0\np/yrWObwfHoaQ2oOiDF0ag=="
+}

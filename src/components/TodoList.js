@@ -21,15 +21,19 @@ const TodoList = () => {
     const {user_id} = useParams();
 
   useEffect(() => {
-    if(!context.user || context.user.id !== parseInt(user_id, 10)) {
+    if(!localStorage.getItem('session_token')) {
       context.actions.logout()
     }
-  }, [context.user])
+  }, [])
 
 
     useEffect(() => {
         const axios = require('axios');
-        axios.get('http://127.0.0.1:5000/api/items')
+        axios.get('http://localhost:5000/api/items', {
+            headers: {
+                Authorization: `JWT ${localStorage.getItem('session_token')}`
+            }
+        })
         .then(function (response){
             const newArray = response.data.map(task => {
                 const newTask = {
@@ -39,7 +43,6 @@ const TodoList = () => {
                 }
                 return newTask;
             })
-            console.log(newArray)
             setTask(newArray)
         })
         .catch(function (error){
@@ -59,7 +62,11 @@ const TodoList = () => {
     //desc: the description of our todolist item
     //status: whether or not our element has been checked off
     function addTask(todoItem){
-        axios.post("http://localhost:5000/api/items", todoItem)
+        axios.post("http://localhost:5000/api/items", todoItem, {
+            headers: {
+                Authorization: `JWT ${localStorage.getItem('session_token')}`
+                }
+            })
             .then((result) => {
                 const newArray = result.data.map(task => {
                     const newTask = {
@@ -78,7 +85,11 @@ const TodoList = () => {
     function removeTask(todoItemIndex){
          const newTasks = [...tasks];
         const itemId = newTasks[todoItemIndex].key
-        axios.delete("http://localhost:5000/api/items/" + itemId)
+        axios.delete("http://localhost:5000/api/items/" + itemId, {
+            headers: {
+                Authorization: `JWT ${localStorage.getItem('session_token')}`
+                }
+            })
             .then((result) => {
                 const newArray = result.data.map(task => {
                     const newTask = {
@@ -97,7 +108,11 @@ const TodoList = () => {
     function reverseStatus(todoItemIndex){
         const newTasks = [...tasks];
         const itemId = newTasks[todoItemIndex].key
-        axios.put("http://localhost:5000/api/items/" + itemId)
+        axios.put("http://localhost:5000/api/items/" + itemId, null,{
+            headers: {
+                Authorization: `JWT ${localStorage.getItem('session_token')}`
+                }
+            })
             .then((result) => {
                 const newArray = result.data.map(task => {
                     const newTask = {

@@ -1,7 +1,6 @@
 import React, {useContext, useState} from 'react';
 import {Button, TextField} from "@material-ui/core";
 import {Link} from "react-router-dom"
-import {useHistory} from 'react-router';
 import UserContext from './UserContext'
 
 const validUsers = {
@@ -21,10 +20,7 @@ function Login(props) {
     const userContext = useContext(UserContext)
 
     function handleLogin(e){
-        // if (Object.keys(validUsers).includes(username)){
-            console.log("MADE IT IN lOGIN BUTTON")
-            userContext.actions.login(username)
-        // }
+            userContext.actions.login(username, password)
     }
 
     return (
@@ -34,7 +30,7 @@ function Login(props) {
                 <TextField label="Username" value={username} onChange={e => setUsername(e.target.value)}></TextField>
             </div>
             <div>
-                <TextField label="Password" value={password} onChange={e => setPassword(e.target.value)}></TextField>
+                <TextField label="Password" value={password} type="password" onChange={e => setPassword(e.target.value)}></TextField>
             </div>
             <div>
                 <Button color="primary" variant="contained" onClick={handleLogin}>Submit</Button>
